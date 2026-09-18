@@ -12,15 +12,13 @@ Run examples from the repository root, where `BothLandauCollision.py` can be imp
 python -m pip install numpy scipy
 ```
 
-The examples and regression tests have been checked with Python 3.13, NumPy 2.5.3, and SciPy 1.17.0. There is no build or installation step for the local module.
+The examples have been checked with Python 3.13, NumPy 2.5.3, and SciPy 1.17.0. There is no build or installation step for the local module.
 
 | File | Purpose |
 | --- | --- |
 | [BothLandauCollision.py](BothLandauCollision.py) | Particle data, collision solvers, diagnostics, and ensemble workers |
 | [T_iso.py](T_iso.py) | Temperature-isotropization benchmark and its analytical reference rate |
 | [T_relax_m.py](T_relax_m.py) | Two-species temperature-relaxation benchmark |
-| [tests/test_solver_controls.py](tests/test_solver_controls.py) | Regression checks using generated initial conditions |
-| [PAPER_IMPLEMENTATION_REVIEW.md](PAPER_IMPLEMENTATION_REVIEW.md) | Detailed comparison with the manuscript and subsequent fixes |
 
 ## Units and input conventions
 
@@ -323,16 +321,6 @@ The example snippets above generate their own initial states. The larger benchma
 `T_iso.get_nu_iso` returns the coefficient in $dT_\perp/dt=\tau_{\rm iso}^{-1}(T_\parallel-T_\perp)$ for the $T_\perp>T_\parallel$ benchmark. The rate for the temperature difference itself is $3\tau_{\rm iso}^{-1}$. `T_relax_m.get_nu_relax` gives the coefficient in $dT_1/dt=\tau_{12}^{-1}(T_2-T_1)$; importing that legacy script also runs its top-level code.
 
 The equal-weight condition is essential for physical conservation; the current constructor only warns about unequal weights. The Coulomb kernel is singular for exactly coincident velocities of distinct particles and has no regularization in this implementation. Conservation alone does not establish timestep accuracy, particularly for pairs with very small relative speeds. The optional Sobol initializer is used only with `T_tolerance`, requires a power-of-two particle count, and currently ignores the requested mean flow.
-
-## Tests
-
-From the repository root:
-
-```bash
-python -B -m unittest discover -s tests -v
-```
-
-The tests cover grouping, history times, snapshot copies, ensemble serialization, isotropization normalization, and conservation under mixed grouping. They do not require the benchmark pickle files or reproduce the full relaxation figures.
 
 ## License
 
