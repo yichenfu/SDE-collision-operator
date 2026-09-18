@@ -293,7 +293,7 @@ $$
 
 The intra-species matrix is called `M` in the code. Its pair blocks include $\sqrt{w_cL}/(2m)$; for inter-species collisions, `omega_hat_g_ij_inter` includes $\sqrt{w_cL}/2$ and the species block builders subsequently divide by the appropriate mass. The factor $1/2$ comes from midpoint averaging, while the timestep is already contained in $\Delta\mathbf W$.
 
-For equal masses $Q$ is skew-symmetric. For unequal masses it satisfies $HQ+Q^TH=0$, with $H=\operatorname{diag}(m_\alpha I,m_\beta I)$. Its Cayley transform preserves the mass-weighted kinetic energy. Pair impulses cancel in the momentum sum, and the energy cancellation follows from $\mathbf u_{k+1/2}\cdot(\boldsymbol\Omega_k\times\mathbf u_{k+1/2})=0$. Thus, for equal physical particle weights, the scheme preserves
+For equal masses $Q$ is skew-symmetric. For unequal masses it satisfies $HQ+Q^TH=0$, with $H=\mathrm{diag}(m_\alpha I,m_\beta I)$. Its Cayley transform preserves the mass-weighted kinetic energy. Pair impulses cancel in the momentum sum, and the energy cancellation follows from $\mathbf u_{k+1/2}\cdot(\boldsymbol\Omega_k\times\mathbf u_{k+1/2})=0$. Thus, for equal physical particle weights, the scheme preserves
 
 $$
 \mathbf P=\sum_{s,i}w_0m_s\mathbf v^{s,i},\qquad
