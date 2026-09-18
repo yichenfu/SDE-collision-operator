@@ -1,5 +1,10 @@
 """
-Calculate the temperature relaxation with mass ratio, using modified midpoint method
+Benchmark temperature relaxation between two species with unequal masses.
+
+Pre-generated initial conditions are loaded from data/initial_conditions, and
+one BothExplicit solver is saved per realization. This legacy script executes
+at import time and has no multiprocessing main guard; use the README's direct
+API examples for a self-contained run or when using spawn-based workers.
 """
 import numpy as np
 from BothLandauCollision import *
@@ -16,6 +21,14 @@ N_process = 16
 
 # ==================== Define collision time ====================
 def get_nu_relax(T1, T2, m1, m2, e1, e2, n2, coulomb_log):
+    """Return the Maxwellian temperature-exchange rate tau_12**(-1).
+
+    The rate multiplies (T2-T1) in dT1/dt. T1/T2 are temperatures, m1/m2
+    masses, e1/e2 charges, and n2 the field species' number density. Units
+    set k_B=epsilon_0=1. To obtain tau_21**(-1), swap species labels and
+    supply n1 as the field density. Charges appear squared, so their signs
+    do not affect this collision coefficient.
+    """
     return n2 * e1**2. * e2**2. * coulomb_log * ( (T1/m1) + (T2/m2) )**(-1.5) / ( 3. * np.sqrt(2.*np.pi**3.) * m1 * m2 )
 
 
@@ -37,14 +50,17 @@ e2=1.
 
 N1 = 64
 N2 = 128
+# Density-proportional counts give equal macro-particle weights n1/N1=n2/N2.
 
 coulomb_log = 1.
 
 tau = 1./get_nu_relax(T1, T2, m1, m2, e1, e2, n2, coulomb_log)
+# tau_ee is the reference rate with both arguments set to species 1.
 tau_ee = 1./get_nu_relax(T1, T1, m1, m1, e1, e1, n1, coulomb_log)
 
 
 # ==================== Load initial conditions ====================
+# Each ensemble entry is indexed by species label 1 or 2, as used by workers.
 with open('./data/initial_conditions/N({},{})_T({},{})_m({},{})_n({},{}).pickle'.format(N1,N2,int(T1),int(T2),int(m1),int(m2),int(n1),int(n2)), 'rb') as handle:
     s_ensemble = pickle.load(handle)
 
@@ -57,6 +73,7 @@ total_t = 6. * tau
 Nt = int(total_t/dt)
 N_record = max(int(Nt/2000),1)
 N_groups = [1,1,1]
+# The order is [inter-species groups, species-1 groups, species-2 groups].
 
 pool = mp.Pool(processes=N_process)
 job_status = {}
@@ -66,6 +83,7 @@ for i in Process_list:
     if i%N_process == 0: print_status = True 
     else: print_status = False
     
+    # The worker uses sub_id as its collision RNG seed and output pickle name.
     job_status[i] = pool.apply_async(func=get_ensemble_explicit, 
                                      kwds={
                                          'dt':dt, 
@@ -84,6 +102,7 @@ for i in Process_list:
                                      error_callback=print)
 
 for i in Process_list:
+    # Legacy behavior: errors go to error_callback; wait() does not re-raise them.
     job_status[i].wait()
 
 time_used = time.time() - start_time
